@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+
 import type { RootState, AppDispatch } from "../redux/store";
 
 import { clearCart } from "../redux/cartSlice";
 import CartItem from "../components/CartItem";
+
+import { auth, db } from "../firebaseConfig";
 
 const Cart = () => {
   const items = useSelector((state: RootState) => state.cart.items);
@@ -12,6 +16,7 @@ const Cart = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [checkoutMessage, setCheckoutMessage] = useState("");
+  const [checkoutError, setCheckoutError] = useState("");
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
@@ -20,10 +25,40 @@ const Cart = () => {
     0,
   );
 
-  const handleCheckout = () => {
-    dispatch(clearCart());
+  const handleCheckout = async () => {
+    const user = auth.currentUser;
 
-    setCheckoutMessage("Checkout successful! Your cart has been cleared.");
+    setCheckoutMessage("");
+    setCheckoutError("");
+
+    if (!user) {
+      setCheckoutError("You must be logged in to place an order.");
+      return;
+    }
+
+    if (items.length === 0) {
+      setCheckoutError("Your cart is empty.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "orders"), {
+        userId: user.uid,
+        userEmail: user.email,
+        items,
+        totalItems,
+        totalPrice,
+        createdAt: serverTimestamp(),
+      });
+
+      dispatch(clearCart());
+
+      setCheckoutMessage("Order placed successfully!");
+    } catch (error) {
+      console.error(error);
+
+      setCheckoutError("Unable to place your order.");
+    }
   };
 
   return (
@@ -31,7 +66,9 @@ const Cart = () => {
       <section className="cart-header">
         <div>
           <p className="section-label">YOUR ORDER</p>
+
           <h1>Shopping Cart</h1>
+
           <p className="cart-subtitle">Review your items before checkout.</p>
         </div>
 
@@ -44,6 +81,10 @@ const Cart = () => {
 
       {checkoutMessage && (
         <div className="checkout-message">{checkoutMessage}</div>
+      )}
+
+      {checkoutError && (
+        <div className="auth-message auth-error">{checkoutError}</div>
       )}
 
       {items.length === 0 ? (
@@ -92,6 +133,7 @@ const Cart = () => {
 
             <div className="summary-row">
               <span>Subtotal</span>
+
               <strong>${totalPrice.toFixed(2)}</strong>
             </div>
 
@@ -104,6 +146,7 @@ const Cart = () => {
 
             <div className="summary-total">
               <span>Total</span>
+
               <strong>${totalPrice.toFixed(2)}</strong>
             </div>
 

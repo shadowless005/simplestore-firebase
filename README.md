@@ -1,16 +1,23 @@
 # SimpleStore
 
-SimpleStore is an e-commerce web application built with React and TypeScript. Users can browse products, search by name, filter by category, add items to their cart, update quantities, and complete a checkout.
+SimpleStore is a full-stack e-commerce application built with React, TypeScript, Redux Toolkit, React Query, and Firebase. It uses Firebase Authentication and Firestore to provide secure user authentication, product management, shopping cart functionality, and order management.
 
 ## Features
 
-- Browse products
+- User registration and login with Firebase Authentication
+- User profile management (Create, Read, Update, Delete)
+- Browse products from Firestore
 - Search products
-- Filter by category
-- Shopping cart
-- Update item quantities
-- Remove items from cart
-- Checkout functionality
+- Filter products by category
+- Add new products
+- Edit existing products
+- Delete products
+- Shopping cart with quantity management
+- Secure checkout
+- Store orders in Firestore
+- View order history
+- View order details
+- Responsive design
 
 ## Technologies Used
 
@@ -19,7 +26,8 @@ SimpleStore is an e-commerce web application built with React and TypeScript. Us
 - Redux Toolkit
 - React Query
 - React Router
-- Axios
+- Firebase Authentication
+- Firestore
 - CSS
 
 ## Installation
@@ -27,7 +35,7 @@ SimpleStore is an e-commerce web application built with React and TypeScript. Us
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+git clone https://github.com/shadowless005/advanced-ecommerce.git
 ```
 
 Install dependencies:
@@ -44,5 +52,5 @@ npm run dev
 
 ## Author
 
-Matt Shin
+Matthew Shin  
 Coding Temple Software Engineering Bootcamp

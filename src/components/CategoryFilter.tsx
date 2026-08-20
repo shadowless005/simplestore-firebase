@@ -1,40 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchCategories } from "../api/products";
-
 interface CategoryFilterProps {
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
+  categories: string[];
 }
 
 const CategoryFilter = ({
   selectedCategory,
   onCategoryChange,
+  categories,
 }: CategoryFilterProps) => {
-  const {
-    data: categories,
-    isLoading,
-    error,
-  } = useQuery<string[]>({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="category-filter">
-        <p>Loading categories...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="category-filter">
-        <p>Error loading categories.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="category-filter">
       <div className="control-label">
@@ -67,7 +41,7 @@ const CategoryFilter = ({
       >
         <option value="all">All Categories</option>
 
-        {categories?.map((category) => (
+        {categories.map((category) => (
           <option key={category} value={category}>
             {category}
           </option>

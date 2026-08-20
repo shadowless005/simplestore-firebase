@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchProducts, fetchProductsByCategory } from "../api/products";
+import { fetchProductsFromFirestore } from "../services/productService";
 
 import type { Product } from "../types/Product";
 
@@ -17,20 +17,24 @@ const Home = () => {
     isLoading,
     error,
   } = useQuery<Product[]>({
-    queryKey: ["products", selectedCategory],
-
-    queryFn: () => {
-      if (selectedCategory === "all") {
-        return fetchProducts();
-      }
-
-      return fetchProductsByCategory(selectedCategory);
-    },
+    queryKey: ["products"],
+    queryFn: fetchProductsFromFirestore,
   });
 
-  const filteredProducts = products?.filter((product) =>
-    product.title.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const categories = [
+    ...new Set(products?.map((product) => product.category) ?? []),
+  ];
+
+  const filteredProducts = products?.filter((product) => {
+    const matchesSearch = product.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "all" || product.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
 
   if (isLoading) {
     return <p className="status-message">Loading products...</p>;
@@ -77,6 +81,7 @@ const Home = () => {
         <CategoryFilter
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
+          categories={categories}
         />
 
         <div className="search-container">

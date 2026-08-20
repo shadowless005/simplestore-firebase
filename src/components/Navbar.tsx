@@ -1,11 +1,23 @@
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
-import type { RootState } from "../redux/store";
+import { signOut } from "firebase/auth";
+import type { User } from "firebase/auth";
 
-const Navbar = () => {
+import type { RootState } from "../redux/store";
+import { auth } from "../firebaseConfig";
+
+interface NavbarProps {
+  user: User | null;
+}
+
+const Navbar = ({ user }: NavbarProps) => {
   const items = useSelector((state: RootState) => state.cart.items);
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
 
   return (
     <nav className="navbar">
@@ -40,6 +52,69 @@ const Navbar = () => {
             Categories
           </a>
 
+          {user ? (
+            <>
+              <NavLink
+                to="/products/add"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active-link" : "nav-link"
+                }
+              >
+                Add Product
+              </NavLink>
+
+              <NavLink
+                to="/orders"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active-link" : "nav-link"
+                }
+              >
+                Orders
+              </NavLink>
+
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active-link" : "nav-link"
+                }
+              >
+                Profile
+              </NavLink>
+            </>
+          ) : (
+            <>
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active-link" : "nav-link"
+                }
+              >
+                Login
+              </NavLink>
+
+              <NavLink
+                to="/register"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active-link" : "nav-link"
+                }
+              >
+                Register
+              </NavLink>
+            </>
+          )}
+        </div>
+
+        <div className="nav-actions">
+          {user && (
+            <button
+              type="button"
+              className="navbar-logout"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          )}
+
           <NavLink
             to="/cart"
             className={({ isActive }) =>
@@ -54,6 +129,7 @@ const Navbar = () => {
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <circle cx="9" cy="20" r="1" />
               <circle cx="19" cy="20" r="1" />

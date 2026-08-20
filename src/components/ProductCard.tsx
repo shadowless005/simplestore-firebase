@@ -1,7 +1,13 @@
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { deleteDoc, doc } from "firebase/firestore";
+
 import type { AppDispatch } from "../redux/store";
 import { addToCart } from "../redux/cartSlice";
 import type { Product } from "../types/Product";
+
+import { auth, db } from "../firebaseConfig";
 
 interface ProductCardProps {
   product: Product;
@@ -9,6 +15,9 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const queryClient = useQueryClient();
+
+  const user = auth.currentUser;
 
   const handleAddToCart = () => {
     dispatch(
@@ -20,6 +29,27 @@ const ProductCard = ({ product }: ProductCardProps) => {
         quantity: 1,
       }),
     );
+  };
+
+  const handleDeleteProduct = async () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${product.title}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, "products", product.id));
+
+      await queryClient.invalidateQueries({
+        queryKey: ["products"],
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Unable to delete product.");
+    }
   };
 
   return (
@@ -74,6 +104,25 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </svg>
             Add to Cart
           </button>
+
+          {user && (
+            <>
+              <Link
+                to={`/products/edit/${product.id}`}
+                className="edit-product-button"
+              >
+                Edit Product
+              </Link>
+
+              <button
+                type="button"
+                className="delete-product-button"
+                onClick={handleDeleteProduct}
+              >
+                Delete Product
+              </button>
+            </>
+          )}
         </div>
       </div>
     </article>
