@@ -1,20 +1,23 @@
 # SimpleStore
 
-SimpleStore is an e-commerce web application built with React and TypeScript. Users can browse products, search by name, filter by category, add items to their cart, update quantities, and complete a checkout.
+SimpleStore is a full-stack e-commerce application built with React, TypeScript, Redux Toolkit, React Query, and Firebase. It uses Firebase Authentication and Firestore to provide secure user authentication, product management, shopping cart functionality, and order management.
 
 ## Features
 
-- Browse products
+- User registration and login with Firebase Authentication
+- User profile management (Create, Read, Update, Delete)
+- Browse products from Firestore
 - Search products
-- Filter by category
-- Shopping cart
-- Update item quantities
-- Remove items from cart
-- Simulated checkout clears the Redux cart and its sessionStorage entry
-- Checkout success feedback
-- Same-tab cart persistence with sessionStorage
-- Product ratings, descriptions, and image fallbacks
-- API-loaded category dropdown and category-specific product requests
+- Filter products by category
+- Add new products
+- Edit existing products
+- Delete products
+- Shopping cart with quantity management
+- Secure checkout
+- Store orders in Firestore
+- View order history
+- View order details
+- Responsive design
 
 ## Technologies Used
 
@@ -23,7 +26,8 @@ SimpleStore is an e-commerce web application built with React and TypeScript. Us
 - Redux Toolkit
 - React Query
 - React Router
-- Axios
+- Firebase Authentication
+- Firestore
 - CSS
 
 ## Installation
@@ -31,8 +35,7 @@ SimpleStore is an e-commerce web application built with React and TypeScript. Us
 Clone the repository:
 
 ```bash
-git clone https://github.com/shadowless005/simplestore.git
-cd simplestore
+git clone https://github.com/shadowless005/advanced-ecommerce.git
 ```
 
 Install dependencies:
@@ -49,16 +52,5 @@ npm run dev
 
 ## Author
 
-Matt Shin
+Matthew Shin  
 Coding Temple Software Engineering Bootcamp
-
-## How It Works
-
-React Query fetches products and categories from FakeStoreAPI. Redux Toolkit manages cart items and quantities. The cart is saved as an array of product objects in sessionStorage and restored on same-tab refresh. Totals update as quantities change. Checkout is a simulation; it does not process payments or create server-side orders.
-
-## Validation
-
-```bash
-npm run build
-npm run lint
-```
