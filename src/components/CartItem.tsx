@@ -24,8 +24,8 @@ const CartItem = ({ item }: CartItemProps) => {
           alt={item.title}
           className="cart-item-image"
           onError={(event) => {
-            event.currentTarget.src =
-              "https://via.placeholder.com/150?text=No+Image";
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = `${import.meta.env.BASE_URL}placeholder.svg`;
           }}
         />
       </div>
