@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 import { auth, db } from "../firebaseConfig";
 
@@ -33,7 +33,6 @@ const OrderHistory = () => {
         const ordersQuery = query(
           collection(db, "orders"),
           where("userId", "==", user.uid),
-          orderBy("createdAt", "desc"),
         );
 
         const snapshot = await getDocs(ordersQuery);
@@ -43,6 +42,9 @@ const OrderHistory = () => {
           ...document.data(),
         })) as Order[];
 
+        userOrders.sort((a, b) =>
+          (b.createdAt?.toDate().getTime() ?? 0) - (a.createdAt?.toDate().getTime() ?? 0),
+        );
         setOrders(userOrders);
       } catch (error) {
         console.error(error);

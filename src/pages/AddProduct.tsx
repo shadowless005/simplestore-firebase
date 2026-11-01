@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
@@ -6,6 +7,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 const AddProduct = () => {
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -34,6 +36,8 @@ const AddProduct = () => {
           count: 0,
         },
       });
+
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
 
       setMessage("Product added successfully!");
 

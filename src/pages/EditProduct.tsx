@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,6 +8,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 const EditProduct = () => {
+  const queryClient = useQueryClient();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -74,6 +76,8 @@ const EditProduct = () => {
         category,
         image,
       });
+
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
 
       setMessage("Product updated successfully!");
     } catch (error) {

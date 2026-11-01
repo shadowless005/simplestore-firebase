@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { doc, getDoc } from "firebase/firestore";
 
-import { db } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 
 interface OrderItem {
   id: string;
@@ -44,7 +44,7 @@ const OrderDetails = () => {
         const orderRef = doc(db, "orders", id);
         const orderSnap = await getDoc(orderRef);
 
-        if (orderSnap.exists()) {
+        if (orderSnap.exists() && orderSnap.data().userId === auth.currentUser?.uid) {
           setOrder({
             id: orderSnap.id,
             ...orderSnap.data(),

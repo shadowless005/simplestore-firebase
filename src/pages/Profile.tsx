@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { deleteUser } from "firebase/auth";
-import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { deleteUser, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
 
 import { auth, db } from "../firebaseConfig";
 
@@ -10,6 +10,9 @@ const Profile = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -85,8 +88,13 @@ const Profile = () => {
       return;
     }
 
+    if (!user.email || !deletePassword) {
+      setError("Enter your current password before deleting your account.");
+      return;
+    }
+
     const confirmed = window.confirm(
-      "Are you sure you want to permanently delete your account?",
+      "Permanently delete your account, profile, and order history?",
     );
 
     if (!confirmed) {
@@ -96,15 +104,42 @@ const Profile = () => {
     setMessage("");
     setError("");
 
+    setDeleting(true);
     try {
-      await deleteDoc(doc(db, "users", user.uid));
-
-      await deleteUser(user);
-
+      // Verify the password before deleting any stored data.
+      await reauthenticateWithCredential(
+        user,
+        EmailAuthProvider.credential(user.email, deletePassword),
+      );
+      const profileRef = doc(db, "users", user.uid);
+      const profileSnapshot = await getDoc(profileRef);
+      const orders = await getDocs(query(
+        collection(db, "orders"), where("userId", "==", user.uid),
+      ));
+      // Keep each write batch below Firestore's operation limit.
+      for (let offset = 0; offset < orders.docs.length; offset += 400) {
+        const batch = writeBatch(db);
+        orders.docs.slice(offset, offset + 400).forEach((order) => batch.delete(order.ref));
+        await batch.commit();
+      }
+      await deleteDoc(profileRef);
+      try {
+        await deleteUser(user);
+      } catch (authError) {
+        // Restore the profile if Authentication deletion fails.
+        if (profileSnapshot.exists()) {
+          await setDoc(profileRef, profileSnapshot.data());
+        }
+        throw authError;
+      }
+      sessionStorage.removeItem("cart");
       navigate("/");
     } catch (error) {
       console.error(error);
-      setError("Unable to delete account.");
+      setError("Account deletion did not finish. Check your password and connection, then retry. Some order data may already have been removed.");
+    } finally {
+      setDeleting(false);
+      setDeletePassword("");
     }
   };
 
@@ -162,12 +197,16 @@ const Profile = () => {
             Update Profile
           </button>
 
+          <label htmlFor="delete-password">Current password (only for account deletion)</label>
+          <input id="delete-password" type="password" autoComplete="current-password"
+            value={deletePassword} onChange={(event) => setDeletePassword(event.target.value)} />
           <button
             type="button"
+            disabled={deleting}
             className="delete-account-button"
             onClick={handleDeleteAccount}
           >
-            Delete Account
+            {deleting ? "Deleting..." : "Delete Account"}
           </button>
         </div>
       </div>

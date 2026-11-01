@@ -42,7 +42,9 @@ const Home = () => {
 
   if (error) {
     return (
-      <p className="status-message error-message">Error loading products.</p>
+      <p className="status-message error-message">
+        Error loading products: {error.message}
+      </p>
     );
   }
 
